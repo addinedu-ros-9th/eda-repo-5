@@ -1,0 +1,36 @@
+create database ojk;
+use ojk;
+create table gu 
+(
+    gu varchar(16),
+    station int
+);
+create table restaurant
+(
+    gu varchar(16),
+    name varchar(32),
+    popularity int,
+    value int,
+    address varchar(64),
+    latitude double,
+    longitude double
+);
+create table play
+(
+    gu varchar(16),
+    name varchar(32),
+    category varchar(32),
+    popularity int,
+    address varchar(64),
+    latitude double,
+    longitude double
+    
+);
+create table spot
+(
+    gu varchar(16),
+    name varchar(32),
+    address varchar(64),
+    weather int,
+    busy int
+);
