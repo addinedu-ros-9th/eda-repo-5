@@ -1,6 +1,6 @@
 create database ojk;
 use ojk;
-create table gu 
+create table station 
 (
     gu varchar(16),
     station int
@@ -9,6 +9,7 @@ create table restaurant
 (
     gu varchar(16),
     name varchar(32),
+    category varchar(32),
     popularity int,
     value int,
     address varchar(64),
