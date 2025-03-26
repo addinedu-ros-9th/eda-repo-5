@@ -1,37 +1,99 @@
-create database ojk;
+
 use ojk;
-create table station 
+create table spot 
 (
-    gu varchar(16),
-    station int
+    datetime datetime primary key,
+    name varchar(32) primary key,
+    gu varchar(32),
+    min_population int,
+    max_population int,
+    temp float,
+    precipitation float,
+    rain_chance float,
+    precpt_type varchar(32),
+    air_idx float,
+    sky_stts varchar(32),
+    humidity float,
+    wind_spd float
+
+
+);
+create table station
+(
+    name varchar(32) primary key,
+    day varchar(32),
+    line varchar(32),
+    direction varchar(32),
+    t530_t600 FLOAT,
+    t600_t630 FLOAT,
+    t630_t700 FLOAT,
+    t700_t730 FLOAT,
+    t730_t800 FLOAT,
+    t800_t830 FLOAT,
+    t830_t900 FLOAT,
+    t900_t930 FLOAT,
+    t930_t1000 FLOAT,
+    t1000_t1030 FLOAT,
+    t1030_t1100 FLOAT,
+    t1100_t1130 FLOAT,
+    t1130_t1200 FLOAT,
+    t1200_t1230 FLOAT,
+    t1230_t1300 FLOAT,
+    t1300_t1330 FLOAT,
+    t1330_t1400 FLOAT,
+    t1400_t1430 FLOAT,
+    t1430_t1500 FLOAT,
+    t1500_t1530 FLOAT,
+    t1530_t1600 FLOAT,
+    t1600_t1630 FLOAT,
+    t1630_t1700 FLOAT,
+    t1700_t1730 FLOAT,
+    t1730_t1800 FLOAT,
+    t1800_t1830 FLOAT,
+    t1830_t1900 FLOAT,
+    t1900_t1930 FLOAT,
+    t1930_t2000 FLOAT,
+    t2000_t2030 FLOAT,
+    t2030_t2100 FLOAT,
+    t2100_t2130 FLOAT,
+    t2130_t2200 FLOAT,
+    t2200_t2230 FLOAT,
+    t2230_t2300 FLOAT,
+    t2300_t2330 FLOAT,
+    t2330_t2400 FLOAT,
+    t2400_t2430 FLOAT;
+    
+)
+create table enjoy
+(
+    name varchar(32) primary key,
+    category varchar(32),
+    review int,
+    address varchar(64),
+    latitude double,
+    longitude double
+);
+create table enjoy_category
+(
+    category varchar(32) primary key,
+    type
+    
+);
+create table cafe
+(
+    name varchar(32) primary key,
+    score float,
+    line_review varchar(64),
+    address varchar(64),
+    latitude double,
+    longitude double,
 );
 create table restaurant
 (
-    gu varchar(16),
-    name varchar(32),
-    category varchar(32),
-    popularity int,
-    value int,
+    name varchar(32) primary key,
+    score float,
+    review int,
     address varchar(64),
     latitude double,
     longitude double
-);
-create table play
-(
-    gu varchar(16),
-    name varchar(32),
-    category varchar(32),
-    popularity int,
-    address varchar(64),
-    latitude double,
-    longitude double
-    
-);
-create table spot
-(
-    gu varchar(16),
-    name varchar(32),
-    address varchar(64),
-    weather int,
-    busy int
 );
