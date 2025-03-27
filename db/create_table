@@ -64,6 +64,8 @@ create table station
     t2400_t2430 FLOAT;
     
 )
+<<<<<<< Updated upstream:db/create_table
+=======
 create table enjoy
 (
     name varchar(32) primary key,
@@ -76,19 +78,82 @@ create table enjoy
 create table enjoy_category
 (
     category varchar(32) primary key,
-    type
+    type bool
     
 );
+>>>>>>> Stashed changes:db/ojk
 create table cafe
+(
+    name varchar(16) primary key,
+    station varchar(16),
+    score float,
+    review INT,
+    line_review varchar(256),
+    address varchar(64),
+<<<<<<< Updated upstream:db/create_table
+    latitude double(10,7),
+    longitude double(10,7)
+=======
+    latitude double,
+    longitude double
+>>>>>>> Stashed changes:db/ojk
+);
+create table restaurant
+(
+    name varchar(16) primary key,
+    station varchar(16),
+    category varchar(16),
+    score float,
+    review INT,
+    price int,
+    address varchar(64),
+    latitude double(10,7),
+    longitude double(10,7)
+
+);
+create table enjoy
+(
+    name varchar(16) primary key,
+    station varchar(16),
+    review int,
+    address varchar(64),
+    latitude double(10,7),
+    longitude double(10,7)
+);
+<<<<<<< Updated upstream:db/create_table
+create table enjoy_category
+(
+    category varchar(16) primary key,
+    type varchar(16)
+    
+);
+
+=======
+create table mini_enjoy
+(
+    name varchar(32) primary key,
+    category varchar(32),
+    review int,
+    address varchar(64),
+    latitude double,
+    longitude double
+);
+create table mini_enjoy_category
+(
+    category varchar(32) primary key,
+    type bool
+    
+);
+create table mini_cafe
 (
     name varchar(32) primary key,
     score float,
     line_review varchar(64),
     address varchar(64),
     latitude double,
-    longitude double,
+    longitude double
 );
-create table restaurant
+create table mini_restaurant
 (
     name varchar(32) primary key,
     score float,
@@ -97,3 +162,4 @@ create table restaurant
     latitude double,
     longitude double
 );
+>>>>>>> Stashed changes:db/ojk
