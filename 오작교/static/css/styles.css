@@ -1,0 +1,206 @@
+/* 글로벌 리셋 및 기본 설정 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 폰트 및 기본 스타일 */
+body {
+    font-family: 'Noto Sans KR', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f4f4;
+}
+
+/* 컨테이너 스타일 */
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* 헤더 스타일 */
+.header {
+    background-color: #ff6b6b;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+.header h1 {
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+
+.header p {
+    font-size: 14px;
+}
+
+/* 버튼 공통 스타일 */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    background-color: #ff6b6b;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #6b5b95;
+}
+
+/* 그리드 레이아웃 */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+/* 버튼 스타일 */
+.grid-btn {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.grid-btn:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+}
+
+.grid-btn.selected {
+    background-color: #6b5b95;
+    color: white;
+    border-color: #6b5b95;
+}
+
+/* 슬라이더 스타일 */
+.slider-container {
+    margin: 20px 0;
+}
+
+.slider {
+    width: 100%;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 14px;
+}
+
+/* 날씨 정보 스타일 */
+.weather-info {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+    text-align: center;
+}
+
+/* 탭 스타일 */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #eee;
+}
+
+.tab {
+    flex: 1;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
+}
+
+.tab.active {
+    background-color: #6b5b95;
+    color: white;
+}
+
+/* 장소 아이템 스타일 */
+.place-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.place-item:hover {
+    background-color: #f0f0f0;
+}
+
+.place-item.selected {
+    background-color: #6b5b95;
+    color: white;
+}
+
+.place-details strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.place-details p {
+    color: #666;
+    font-size: 14px;
+}
+
+.place-item.selected .place-details p {
+    color: rgba(255,255,255,0.7);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 600px) {
+    .container {
+        width: 100%;
+        border-radius: 0;
+    }
+
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* 로딩 및 에러 상태 */
+.loading-placeholder,
+.error-message {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+/* 추가 유틸리티 클래스 */
+.hidden {
+    display: none;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}

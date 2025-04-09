@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오작교 - 데이트 코스 추천</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #ff6b6b;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease;
+        }
+        .tab.active {
+            background-color: #6b5b95;
+            color: white;
+        }
+        .content-section {
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .place-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .place-item:hover {
+            background-color: #f0f0f0;
+        }
+        .place-item.selected {
+            background-color: #6b5b95;
+            color: white;
+        }
+        .place-details {
+            flex-grow: 1;
+        }
+        .place-details strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .place-details p {
+            color: #666;
+            font-size: 14px;
+        }
+        .place-item.selected .place-details p {
+            color: rgba(255,255,255,0.7);
+        }
+        .selected-course-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: none;
+        }
+        .selected-course-btn:hover {
+            background-color: #6b5b95;
+        }
+        .weather-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>오작교</h1>
+            <p id="district-title">데이트 코스 추천 결과</p>
+        </div>
+
+        <div class="weather-info" id="weather-info">
+            날씨 정보 로딩 중...
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-section="restaurants">맛집</div>
+            <div class="tab" data-section="attractions">놀거리</div>
+            <div class="tab" data-section="cafes">카페</div>
+        </div>
+
+        <div id="restaurants" class="content-section active">
+            <div class="loading-placeholder">맛집 정보 로딩 중...</div>
+        </div>
+
+        <div id="attractions" class="content-section">
+            <div class="loading-placeholder">놀거리 정보 로딩 중...</div>
+        </div>
+
+        <div id="cafes" class="content-section">
+            <div class="loading-placeholder">카페 정보 로딩 중...</div>
+        </div>
+
+        <button id="selected-course-btn" class="selected-course-btn">
+            데이트 코스 보기
+        </button>
+    </div>
+
+    <script>
+        // URL 파라미터 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const district = urlParams.get('district');
+        const foodCategory = urlParams.get('food_category');
+        const budgetRange = urlParams.get('budget_range');
+
+        // 상태 관리 객체
+        const state = {
+            selectedPlaces: {
+                restaurants: null,
+                attractions: null,
+                cafes: null
+            }
+        };
+
+        // 탭 전환 로직
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 모든 탭과 섹션의 active 클래스 제거
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+
+                // 클릭된 탭과 해당 섹션에 active 클래스 추가
+                this.classList.add('active');
+                document.getElementById(this.dataset.section).classList.add('active');
+            });
+        });
+
+        // 날씨 정보 업데이트
+        function updateWeatherInfo(weatherInfo) {
+            const weatherDisplay = document.getElementById('weather-info');
+            weatherDisplay.innerHTML = `
+                <strong>${weatherInfo.district}</strong> | 
+                ${weatherInfo.weather_status} | 
+                온도: ${weatherInfo.discomfort_index}°C | 
+                강수량: ${weatherInfo.rainfall}mm
+            `;
+        }
+
+        // 장소 목록 렌더링
+        function renderPlaces(type, places) {
+            const container = document.getElementById(type);
+            container.innerHTML = places.map((place, index) => `
+                <div class="place-item" data-type="${type}" data-index="${index}">
+                    <div class="place-details">
+                        <strong>${place.name}</strong>
+                        <p>${place.category || ''} | 평점: ${place.score || '정보 없음'}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // 장소 선택 이벤트 리스너 추가
+            container.querySelectorAll('.place-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const index = this.dataset.index;
+
+                    // 같은 타입의 기존 선택 해제
+                    document.querySelectorAll(`.place-item[data-type="${type}"]`)
+                        .forEach(el => el.classList.remove('selected'));
+
+                    // 현재 아이템 선택
+                    this.classList.add('selected');
+                    state.selectedPlaces[type] = places[index];
+
+                    // 모든 카테고리 선택 시 버튼 표시
+                    checkAllPlacesSelected();
+                });
+            });
+        }
+
+        // 모든 장소 선택 확인
+        function checkAllPlacesSelected() {
+            const selectedCourseBtn = document.getElementById('selected-course-btn');
+            const allSelected = Object.values(state.selectedPlaces).every(place => place !== null);
+
+            if (allSelected) {
+                selectedCourseBtn.style.display = 'block';
+            }
+        }
+
+        // 데이트 코스 추천 API 호출
+        async function fetchRecommendations() {
+            try {
+                const response = await axios.post('/api/recommend', {
+                    district: district,
+                    food_category: foodCategory,
+                    budget_range: budgetRange
+                });
+
+                const { weather_info, restaurants, attractions, cafes } = response.data;
+
+                // 날씨 정보 업데이트
+                updateWeatherInfo(weather_info);
+
+                // 장소 목록 렌더링
+                renderPlaces('restaurants', restaurants);
+                renderPlaces('attractions', attractions);
+                renderPlaces('cafes', cafes);
+
+            } catch (error) {
+                console.error('추천 데이터 로드 중 오류:', error);
+                alert('데이트 코스를 불러오는 데 실패했습니다.');
+            }
+        }
+
+        // 코스 보기 버튼 클릭 이벤트
+        document.getElementById('selected-course-btn').addEventListener('click', function() {
+            const { restaurants, attractions, cafes } = state.selectedPlaces;
+            
+            // 카카오맵 경로 표시 (임시 구현)
+            const mapUrl = `https://map.kakao.com/link/map/${restaurants.name},${attractions.name},${cafes.name}`;
+            window.open(mapUrl, '_blank');
+        });
+
+        // 페이지 로드 시 추천 데이터 불러오기
+        fetchRecommendations();
+
+        // 구 제목 업데이트
+        document.getElementById('district-title').textContent = `${district} 데이트 코스 추천 결과`;
+    </script>
+</body>
+</html>

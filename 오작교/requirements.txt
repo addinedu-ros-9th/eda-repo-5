@@ -1,0 +1,18 @@
+# 백엔드 필수 패키지
+Flask==2.3.2
+mysql-connector-python==8.1.0
+pandas==2.0.2
+numpy==1.24.3
+requests==2.31.0
+
+# 데이터 처리 및 분석
+scikit-learn==1.2.2
+scipy==1.10.1
+
+# 개발 및 디버깅 도구
+python-dotenv==1.0.0
+flask-cors==4.0.0
+
+# 선택적 패키지 (필요에 따라 추가/제거)
+geopy==2.3.0  # 지리적 거리 계산
+folium==0.14.0  # 지도 시각화 (필요시)

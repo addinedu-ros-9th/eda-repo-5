@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오작교 - 데이트 코스 추천</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #ff6b6b;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 16px;
+        }
+        .district-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            padding: 20px;
+        }
+        .district-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .district-btn:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.05);
+        }
+        .district-btn.selected {
+            background-color: #6b5b95;
+            color: white;
+            border-color: #6b5b95;
+        }
+        .footer {
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>오작교</h1>
+            <p>당신만의 특별한 데이트 코스를 찾아보세요</p>
+        </div>
+        
+        <div class="district-grid">
+            <div class="district-btn" data-district="강남구">강남구</div>
+            <div class="district-btn" data-district="강동구">강동구</div>
+            <div class="district-btn" data-district="강북구">강북구</div>
+            <div class="district-btn" data-district="강서구">강서구</div>
+            <div class="district-btn" data-district="관악구">관악구</div>
+            <div class="district-btn" data-district="광진구">광진구</div>
+            <div class="district-btn" data-district="구로구">구로구</div>
+            <div class="district-btn" data-district="금천구">금천구</div>
+            <div class="district-btn" data-district="노원구">노원구</div>
+            <div class="district-btn" data-district="도봉구">도봉구</div>
+            <div class="district-btn" data-district="동대문구">동대문구</div>
+            <div class="district-btn" data-district="동작구">동작구</div>
+            <div class="district-btn" data-district="마포구">마포구</div>
+            <div class="district-btn" data-district="서대문구">서대문구</div>
+            <div class="district-btn" data-district="서초구">서초구</div>
+            <div class="district-btn" data-district="성동구">성동구</div>
+            <div class="district-btn" data-district="성북구">성북구</div>
+            <div class="district-btn" data-district="송파구">송파구</div>
+            <div class="district-btn" data-district="양천구">양천구</div>
+            <div class="district-btn" data-district="영등포구">영등포구</div>
+            <div class="district-btn" data-district="용산구">용산구</div>
+            <div class="district-btn" data-district="은평구">은평구</div>
+            <div class="district-btn" data-district="종로구">종로구</div>
+            <div class="district-btn" data-district="중구">중구</div>
+            <div class="district-btn" data-district="중랑구">중랑구</div>
+        </div>
+
+        <div class="footer">
+            © 2024 오작교. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        // 구 선택 로직
+        document.querySelectorAll('.district-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 모든 버튼의 선택 클래스 제거
+                document.querySelectorAll('.district-btn').forEach(b => b.classList.remove('selected'));
+                
+                // 현재 버튼 선택
+                this.classList.add('selected');
+                
+                // 선택된 구 정보로 다음 페이지로 이동
+                const district = this.dataset.district;
+                
+                // 선택된 구의 기본 정보 로드 (옵션)
+                fetchDistrictInfo(district);
+            });
+        });
+
+        // 구 정보 가져오기
+        async function fetchDistrictInfo(district) {
+            try {
+                const response = await axios.get(`/api/district/${district}`);
+                const data = response.data;
+                
+                // 날씨, 장소 정보 표시 로직
+                console.log(`${district} 지역 정보:`, data);
+                
+                // 다음 페이지로 이동
+                window.location.href = `/select/${district}?district=${district}`;
+            } catch (error) {
+                console.error('지역 정보 로드 중 오류:', error);
+                
+                // 오류 발생해도 페이지 이동
+                window.location.href = `/select/${district}?district=${district}`;
+            }
+        }
+    </script>
+</body>
+</html>

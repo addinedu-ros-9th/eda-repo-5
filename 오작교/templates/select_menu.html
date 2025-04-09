@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오작교 - 데이트 메뉴 선택</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+        .header {
+            background-color: #ff6b6b;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin: -20px -20px 20px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .header h1 {
+            font-size: 22px;
+        }
+        .header p {
+            font-size: 14px;
+        }
+        .food-category {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .food-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .food-btn:hover {
+            background-color: #f0f0f0;
+        }
+        .food-btn.selected {
+            background-color: #6b5b95;
+            color: white;
+            border-color: #6b5b95;
+        }
+        .budget-slider-container {
+            margin-bottom: 20px;
+        }
+        .budget-slider {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .budget-range-display {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 14px;
+        }
+        .weather-info {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .recommend-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .recommend-btn:hover {
+            background-color: #6b5b95;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>오작교</h1>
+            <p id="district-title">데이트 코스 메뉴 선택</p>
+        </div>
+
+        <div class="food-category">
+            <div class="food-btn" data-category="한식">한식</div>
+            <div class="food-btn" data-category="중식">중식</div>
+            <div class="food-btn" data-category="양식">양식</div>
+            <div class="food-btn" data-category="일식">일식</div>
+            <div class="food-btn" data-category="고기">고기</div>
+            <div class="food-btn" data-category="이색음식">이색음식</div>
+            <div class="food-btn" data-category="랜덤">랜덤</div>
+        </div>
+
+        <div class="budget-slider-container">
+            <input type="range" min="0" max="5" value="2" class="budget-slider" id="budget-range">
+            <div class="budget-range-display">
+                <span>0원</span>
+                <span id="budget-display">1-2만원</span>
+                <span>5만원</span>
+            </div>
+        </div>
+
+        <div class="weather-info" id="weather-info">
+            <p id="current-weather">날씨 정보 로딩 중...</p>
+        </div>
+
+        <button class="recommend-btn" id="recommend-btn">데이트 코스 추천받기</button>
+    </div>
+
+    <script>
+        // URL에서 구 정보 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const district = urlParams.get('district');
+
+        // 구 제목 업데이트
+        document.getElementById('district-title').textContent = `${district} 데이트 코스 메뉴 선택`;
+
+        // 상태 관리 객체
+        const state = {
+            selectedCategory: null,
+            budgetRange: 2
+        };
+
+        // 음식 카테고리 선택 로직
+        document.querySelectorAll('.food-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 이미 선택된 카테고리를 다시 클릭하면 선택 해제
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    state.selectedCategory = null;
+                } else {
+                    // 기존 선택 해제
+                    document.querySelectorAll('.food-btn').forEach(b => b.classList.remove('selected'));
+                    
+                    // 새로운 카테고리 선택
+                    this.classList.add('selected');
+                    state.selectedCategory = this.dataset.category;
+                }
+            });
+        });
+
+        // 예산 범위 슬라이더
+        const slider = document.getElementById('budget-range');
+        const budgetDisplay = document.getElementById('budget-display');
+        const budgetRanges = ['0원', '1만원', '1-2만원', '2-3만원', '3-5만원', '5만원 이상'];
+
+        slider.addEventListener('input', function() {
+            state.budgetRange = this.value;
+            budgetDisplay.textContent = budgetRanges[this.value];
+        });
+
+        // 날씨 정보 로드
+        async function fetchWeatherInfo() {
+            try {
+                const response = await axios.get(`/api/district/${district}`);
+                const weatherData = response.data.weather;
+                
+                if (weatherData) {
+                    const weatherInfo = document.getElementById('current-weather');
+                    weatherInfo.textContent = `${weatherData.temp}°C | 강수확률 ${weatherData.precipitation}% | ${weatherData.sky_stts}`;
+                }
+            } catch (error) {
+                console.error('날씨 정보 로드 중 오류:', error);
+                document.getElementById('current-weather').textContent = '날씨 정보를 불러올 수 없습니다.';
+            }
+        }
+
+        // 코스 추천 버튼 클릭
+        document.getElementById('recommend-btn').addEventListener('click', function() {
+            // 데이트 코스 결과 페이지로 이동
+            const category = state.selectedCategory || '랜덤';
+            window.location.href = `/result?district=${district}&food_category=${category}&budget_range=${state.budgetRange}`;
+        });
+
+        // 페이지 로드 시 날씨 정보 불러오기
+        fetchWeatherInfo();
+    </script>
+</body>
+</html>
