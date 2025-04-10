@@ -17,6 +17,21 @@ app = Flask(__name__,
 # 애플리케이션 설정
 app.config.from_object(Config)
 
+# 가격 형식 포맷팅 함수
+def format_price(price):
+    try:
+        price = int(price)
+        if price >= 10000:
+            man = price // 10000
+            chun = (price % 10000) // 1000
+            return f"{man}만{chun}천원" if chun > 0 else f"{man}만원"
+        elif price >= 1000:
+            return f"{price // 1000}천원"
+        else:
+            return f"{price}원"
+    except (ValueError, TypeError):
+        return "금액 오류"
+
 # 메인 페이지 (지도 선택 화면)
 @app.route('/')
 def index():
@@ -92,17 +107,46 @@ def get_district_info(district_name):
 def select_menu(district):
     return render_template('select_menu.html', district=district)
 
-# 추천 API
+# 추천 API - min_budget와 max_budget 처리 추가
 @app.route('/api/recommend', methods=['POST'])
 def recommend_course():
     try:
         data = request.json
         district = data.get('district')
+        station = data.get('station')  # 역 정보 추가
         food_category = data.get('food_category', '랜덤')
-        budget_range = int(data.get('budget_range', 2))  # 기본값: 1-2만원
+        
+        # 새로운 이중 슬라이더 값 처리
+        min_budget = data.get('min_budget')
+        max_budget = data.get('max_budget')
+        
+        # 기존 budget_range 파라미터 호환성 유지
+        budget_range = data.get('budget_range')
         
         engine = RecommendationEngine()
-        course = engine.create_date_course(district, food_category, budget_range)
+        
+        # 새로운 예산 파라미터가 있으면 사용
+        if min_budget is not None and max_budget is not None:
+            min_budget = int(min_budget)
+            max_budget = int(max_budget)
+            
+            # 수정된 RecommendationEngine의 create_date_course 호출
+            course = engine.create_date_course(
+                district=district,
+                station=station,  # 역 정보 추가
+                food_category=food_category,
+                min_budget=min_budget,
+                max_budget=max_budget
+            )
+        else:
+            # 기존 방식 유지
+            budget_range = int(budget_range) if budget_range is not None else 2
+            course = engine.create_date_course(
+                district=district,
+                station=station,  # 역 정보 추가
+                food_category=food_category,
+                budget_range=budget_range
+            )
         
         return jsonify(course)
     
@@ -110,22 +154,56 @@ def recommend_course():
         logger.error(f"데이트 코스 추천 중 오류 발생: {e}")
         return jsonify({"error": "데이트 코스를 추천하는 중 오류가 발생했습니다."}), 500
 
-# 결과 화면
+# 결과 화면 - 이중 슬라이더 처리 추가
 @app.route('/result')
 def result():
     district = request.args.get('district')
+    station = request.args.get('station')  # 역 정보 추가
     food_category = request.args.get('food_category', '랜덤')
-    budget_range = request.args.get('budget_range', '2')
+    
+    # 새로운 이중 슬라이더 값 처리
+    min_budget = request.args.get('min_budget')
+    max_budget = request.args.get('max_budget')
+    
+    # 기존 budget_range 파라미터 호환성 유지
+    budget_range = request.args.get('budget_range')
     
     if not district:
         return redirect(url_for('index'))
     
-    return render_template(
-        'result.html', 
-        district=district, 
-        food_category=food_category, 
-        budget_range=budget_range
-    )
+    # 템플릿에 전달할 변수 준비
+    template_vars = {
+        'district': district,
+        'station': station,  # 역 정보 추가
+        'food_category': food_category
+    }
+    
+    # 새로운 예산 파라미터가 있으면 사용
+    if min_budget is not None and max_budget is not None:
+        min_budget_int = int(min_budget)
+        max_budget_int = int(max_budget)
+        budget_display = f"{format_price(min_budget_int)} ~ {format_price(max_budget_int)}"
+        
+        template_vars.update({
+            'budget_display': budget_display,
+            'min_budget': min_budget_int,
+            'max_budget': max_budget_int
+        })
+    else:
+        # 기존 방식 유지
+        budget_range = budget_range or '2'  # 기본값
+        template_vars['budget_range'] = budget_range
+    
+    return render_template('result.html', **template_vars)
+
+# 맵 화면
+@app.route('/map')
+def map_view():
+    # URL 파라미터 확인
+    if not (request.args.get('restaurant') and request.args.get('attraction') and request.args.get('cafe')):
+        return redirect(url_for('index'))
+    
+    return render_template('map.html')
 
 # 에러 핸들러
 @app.errorhandler(404)
@@ -135,7 +213,45 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500
+# 역 선택 페이지
+@app.route('/stations/<district>')
+def station_selection(district):
+    return render_template('station.html', district=district)
 
+# 역 정보 API
+@app.route('/api/stations/<district>')
+def get_stations(district):
+    try:
+        # 해당 구의 역 목록을 점수(star) 높은 순으로 가져오기
+        query = """
+        SELECT s.station, sc.star 
+        FROM spot s
+        JOIN score sc ON s.station = sc.station
+        WHERE s.gu = %s AND s.station IS NOT NULL AND s.station != ''
+        ORDER BY sc.star DESC
+        LIMIT 5
+        """
+        
+        stations = execute_query(query, (district,))
+        
+        if not stations:
+            logger.warning(f"{district}에 대한 역 정보가 없습니다.")
+            return jsonify({
+                "district": district,
+                "stations": []
+            }), 404
+        
+        return jsonify({
+            "district": district,
+            "stations": stations
+        })
+        
+    except Exception as e:
+        logger.error(f"역 정보 조회 중 오류 발생: {e}")
+        return jsonify({
+            "error": "역 정보를 가져오는 중 오류가 발생했습니다.",
+            "details": str(e)
+        }), 500
 # 디버그 모드 및 호스트 설정
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -66,6 +66,22 @@
             color: white;
             border-color: #6b5b95;
         }
+        .next-btn {
+            display: none;
+            width: 90%;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .next-btn:hover {
+            background-color: #e65c5c;
+        }
         .footer {
             background-color: #f4f4f4;
             text-align: center;
@@ -110,12 +126,17 @@
             <div class="district-btn" data-district="중랑구">중랑구</div>
         </div>
 
+        <button id="next-btn" class="next-btn">다음</button>
+
         <div class="footer">
             © 2024 오작교. All rights reserved.
         </div>
     </div>
 
     <script>
+        // 선택된 구 저장 변수
+        let selectedDistrict = null;
+        
         // 구 선택 로직
         document.querySelectorAll('.district-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -125,32 +146,22 @@
                 // 현재 버튼 선택
                 this.classList.add('selected');
                 
-                // 선택된 구 정보로 다음 페이지로 이동
-                const district = this.dataset.district;
+                // 선택된 구 저장
+                selectedDistrict = this.dataset.district;
                 
-                // 선택된 구의 기본 정보 로드 (옵션)
-                fetchDistrictInfo(district);
+                // 다음 버튼 표시
+                document.getElementById('next-btn').style.display = 'block';
             });
         });
 
-        // 구 정보 가져오기
-        async function fetchDistrictInfo(district) {
-            try {
-                const response = await axios.get(`/api/district/${district}`);
-                const data = response.data;
-                
-                // 날씨, 장소 정보 표시 로직
-                console.log(`${district} 지역 정보:`, data);
-                
-                // 다음 페이지로 이동
-                window.location.href = `/select/${district}?district=${district}`;
-            } catch (error) {
-                console.error('지역 정보 로드 중 오류:', error);
-                
-                // 오류 발생해도 페이지 이동
-                window.location.href = `/select/${district}?district=${district}`;
+        // index.html 내의 다음 버튼 클릭 이벤트
+        document.getElementById('next-btn').addEventListener('click', function() {
+            if (selectedDistrict) {
+                window.location.href = `/stations/${selectedDistrict}?district=${selectedDistrict}`;
+            } else {
+                alert('구를 선택해주세요.');
             }
-        }
+        });
     </script>
 </body>
 </html>

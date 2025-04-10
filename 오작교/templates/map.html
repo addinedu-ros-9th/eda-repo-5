@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오작교 - 데이트 코스 경로</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #ff6b6b;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .distance-info {
+            padding: 20px;
+        }
+        .place-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .place-item strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        .place-item p {
+            color: #666;
+            font-size: 14px;
+        }
+        .distance-indicator {
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ff6b6b;
+            font-weight: bold;
+            position: relative;
+            font-size: 16px;
+        }
+        .distance-indicator::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 40px;
+            background-color: #ff6b6b;
+            z-index: -1;
+        }
+        .total-distance {
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 1px dashed #ddd;
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .back-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #6b5b95;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        .back-btn:hover {
+            background-color: #5a4b84;
+        }
+        .loading {
+            padding: 50px 0;
+            text-align: center;
+            color: #888;
+        }
+        .error-message {
+            padding: 20px;
+            text-align: center;
+            color: #ff6b6b;
+            background-color: #fff0f0;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .distance-note {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>오작교</h1>
+            <p>데이트 코스 경로</p>
+        </div>
+
+        <div id="distance-info" class="distance-info">
+            <div class="loading">경로 정보를 불러오는 중...</div>
+        </div>
+
+        <button id="back-btn" class="back-btn">
+            이전으로 돌아가기
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // URL 파라미터 추출
+            const urlParams = new URLSearchParams(window.location.search);
+            let restaurant, attraction, cafe;
+            
+            // JSON 파싱
+            try {
+                restaurant = JSON.parse(decodeURIComponent(urlParams.get('restaurant')));
+                attraction = JSON.parse(decodeURIComponent(urlParams.get('attraction')));
+                cafe = JSON.parse(decodeURIComponent(urlParams.get('cafe')));
+                
+                // 데이터 유효성 검사
+                if (!restaurant || !attraction || !cafe) {
+                    throw new Error('필요한 데이터가 누락되었습니다.');
+                }
+            } catch (error) {
+                document.getElementById('distance-info').innerHTML = `
+                    <div class="error-message">
+                        데이터를 불러오는 데 실패했습니다.<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+                console.error('데이터 파싱 오류:', error);
+            }
+            
+            // 맵 없이 거리 정보만 표시하는 함수
+            function displayRouteInfoWithoutMap() {
+                try {
+                    // 장소 정보가 있는지 확인
+                    if (!restaurant || !attraction || !cafe) {
+                        throw new Error('장소 정보가 없습니다.');
+                    }
+                    
+                    const distanceInfoContainer = document.getElementById('distance-info');
+                    
+                    // 장소 정보 정리
+                    const places = [
+                        {
+                            name: restaurant.name,
+                            category: restaurant.category || '맛집',
+                            score: restaurant.score || '-',
+                            lat: restaurant.latitude,
+                            lng: restaurant.longitude
+                        },
+                        {
+                            name: attraction.name,
+                            category: attraction.category || '놀거리',
+                            score: attraction.score || '-',
+                            lat: attraction.latitude,
+                            lng: attraction.longitude
+                        },
+                        {
+                            name: cafe.name,
+                            category: cafe.category || '카페',
+                            score: cafe.score || '-',
+                            lat: cafe.latitude,
+                            lng: cafe.longitude
+                        }
+                    ];
+                    
+                    // 직선 거리 계산 함수 (Haversine)
+                    function calculateDirectDistance(p1, p2) {
+                        const R = 6371; // 지구 반경 (km)
+                        const dLat = (p2.lat - p1.lat) * Math.PI / 180;
+                        const dLon = (p2.lng - p1.lng) * Math.PI / 180;
+                        const a = 
+                            Math.sin(dLat/2) * Math.sin(dLat/2) +
+                            Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) * 
+                            Math.sin(dLon/2) * Math.sin(dLon/2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+                        return Math.round(R * c * 1000); // 미터 단위
+                    }
+                    
+                    // 실제 도보 거리 추정 (보정 계수 적용)
+                    function calculateWalkingDistance(p1, p2) {
+                        const directDistance = calculateDirectDistance(p1, p2);
+                        // 도시 환경에서 실제 도보 거리는 직선 거리의 1.4배 정도로 추정
+                        const walkingDistance = Math.round(directDistance * 1.4);
+                        
+                        return {
+                            direct: directDistance,
+                            walking: walkingDistance,
+                            formatted: `약 ${walkingDistance}m`
+                        };
+                    }
+                    
+                    // 도보 시간 계산
+                    function calculateWalkingTime(meters) {
+                        // 평균 보행 속도 = 4km/h = 67m/분
+                        const minutes = Math.round(meters / 67);
+                        if (minutes >= 60) {
+                            const hours = Math.floor(minutes / 60);
+                            const remainingMinutes = minutes % 60;
+                            return `${hours}시간 ${remainingMinutes}분`;
+                        }
+                        return `${minutes}분`;
+                    }
+                    
+                    // 거리 계산
+                    const distanceR2A = calculateWalkingDistance(places[0], places[1]);
+                    const distanceA2C = calculateWalkingDistance(places[1], places[2]);
+                    const totalWalkingDistance = distanceR2A.walking + distanceA2C.walking;
+                    
+                    // 도보 시간
+                    const walkingTimeR2A = calculateWalkingTime(distanceR2A.walking);
+                    const walkingTimeA2C = calculateWalkingTime(distanceA2C.walking);
+                    const totalWalkingTime = calculateWalkingTime(totalWalkingDistance);
+                    
+                    // HTML 생성
+                    let html = '';
+                    
+                    // 맛집 정보
+                    html += `
+                        <div class="place-item">
+                            <strong>1. ${places[0].name}</strong>
+                            <p>${places[0].category} | 평점: ${places[0].score}</p>
+                        </div>
+                        <div class="distance-indicator">
+                            ↓ ${distanceR2A.formatted} (도보 약 ${walkingTimeR2A}) ↓
+                        </div>
+                        <div class="place-item">
+                            <strong>2. ${places[1].name}</strong>
+                            <p>${places[1].category} | 평점: ${places[1].score}</p>
+                        </div>
+                        <div class="distance-indicator">
+                            ↓ ${distanceA2C.formatted} (도보 약 ${walkingTimeA2C}) ↓
+                        </div>
+                        <div class="place-item">
+                            <strong>3. ${places[2].name}</strong>
+                            <p>${places[2].category} | 평점: ${places[2].score}</p>
+                        </div>
+                        <div class="total-distance">
+                            총 거리: 약 ${totalWalkingDistance}m (도보 약 ${totalWalkingTime})
+                        </div>
+                        <p class="distance-note">※ 실제 도보 거리는 도로 상황에 따라 다를 수 있습니다.</p>
+                    `;
+                    
+                    // 결과 표시
+                    distanceInfoContainer.innerHTML = html;
+                } catch (error) {
+                    console.error('장소 표시 중 오류:', error);
+                    document.getElementById('distance-info').innerHTML = `
+                        <div class="error-message">
+                            장소를 표시하는 중 오류가 발생했습니다.<br>
+                            <small>${error.message}</small>
+                        </div>
+                    `;
+                }
+            }
+            
+            // 실행
+            displayRouteInfoWithoutMap();
+            
+            // 뒤로가기 버튼 이벤트
+            document.getElementById('back-btn').addEventListener('click', function() {
+                window.history.back();
+            });
+        });
+    </script>
+</body>
+</html>

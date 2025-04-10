@@ -6,50 +6,122 @@
     <title>오작교 - 데이트 메뉴 선택</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            line-height: 1.6;
-        }
+        /* 컨테이너 크기와 위치 통일 */
         .container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 460px;
             width: 100%;
-            max-width: 500px;
-            padding: 20px;
+            margin: 10vh auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        
         .header {
             background-color: #ff6b6b;
             color: white;
             text-align: center;
-            padding: 15px;
-            margin: -20px -20px 20px;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            padding: 20px 0;
         }
-        .header h1 {
-            font-size: 22px;
+        
+        /* 이중 슬라이더 스타일 */
+        .range-slider-container {
+            padding: 10px 15px;
+            margin: 15px 0;
+            position: relative;
         }
-        .header p {
+        
+        .range-slider {
+            position: relative;
+            width: 100%;
+            height: 5px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin: 30px 0;
+        }
+        
+        .range-selected {
+            height: 100%;
+            position: absolute;
+            background-color: #6b5b95;
+            border-radius: 5px;
+        }
+        
+        .range-input {
+            position: relative;
+        }
+        
+        .range-input input {
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            top: -2.5px; /* 정확히 중앙에 위치하도록 조정 */
+            background: none;
+            pointer-events: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            margin: 0;
+            z-index: 1; /* 레이어 순서 조정 */
+        }
+        
+        .range-input input::-webkit-slider-thumb {
+            height: 17px;
+            width: 17px;
+            border-radius: 50%;
+            background: #6b5b95;
+            pointer-events: auto;
+            -webkit-appearance: none;
+            cursor: pointer;
+            border: none;
+            z-index: 3; /* 핸들이 가장 앞에 오도록 설정 */
+        }
+        
+        .range-input input::-moz-range-thumb {
+            height: 17px;
+            width: 17px;
+            border-radius: 50%;
+            background: #6b5b95;
+            pointer-events: auto;
+            -moz-appearance: none;
+            cursor: pointer;
+            border: none;
+            z-index: 3; /* 핸들이 가장 앞에 오도록 설정 */
+        }
+        
+        .range-slider-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 0; /* 배경 레이어는 가장 뒤에 */
+        }
+        
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: #666;
             font-size: 14px;
         }
+        
+        .budget-display {
+            text-align: center;
+            font-size: 16px;
+            margin: 10px 0;
+            color: #333;
+        }
+        
+        /* 음식 카테고리 버튼 스타일 통일 */
         .food-category {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            margin-bottom: 20px;
+            padding: 15px;
         }
+        
         .food-btn {
             background-color: white;
             border: 1px solid #ddd;
@@ -57,50 +129,54 @@
             text-align: center;
             cursor: pointer;
             border-radius: 5px;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
+        
         .food-btn:hover {
             background-color: #f0f0f0;
         }
+        
         .food-btn.selected {
             background-color: #6b5b95;
             color: white;
             border-color: #6b5b95;
         }
-        .budget-slider-container {
-            margin-bottom: 20px;
-        }
-        .budget-slider {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        .budget-range-display {
-            display: flex;
-            justify-content: space-between;
-            color: #666;
-            font-size: 14px;
-        }
+        
+        /* 날씨 정보 스타일 */
         .weather-info {
-            background-color: #f9f9f9;
-            border: 1px solid #eee;
+            background-color: #f8f8f8;
+            padding: 10px;
             border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
             text-align: center;
+            margin: 15px;
+            font-size: 15px;
         }
+        
+        /* 추천 버튼 */
         .recommend-btn {
             width: 100%;
             padding: 15px;
             background-color: #ff6b6b;
             color: white;
             border: none;
-            border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s;
         }
+        
         .recommend-btn:hover {
-            background-color: #6b5b95;
+            background-color: #e65c5c;
+        }
+        
+        /* 역 정보 디스플레이 */
+        .station-info {
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin: 10px 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
         }
     </style>
 </head>
@@ -110,100 +186,207 @@
             <h1>오작교</h1>
             <p id="district-title">데이트 코스 메뉴 선택</p>
         </div>
-
-        <div class="food-category">
-            <div class="food-btn" data-category="한식">한식</div>
-            <div class="food-btn" data-category="중식">중식</div>
-            <div class="food-btn" data-category="양식">양식</div>
-            <div class="food-btn" data-category="일식">일식</div>
-            <div class="food-btn" data-category="고기">고기</div>
-            <div class="food-btn" data-category="이색음식">이색음식</div>
-            <div class="food-btn" data-category="랜덤">랜덤</div>
+        
+        <!-- 역 정보 표시 (추가) -->
+        <div id="station-info" class="station-info" style="display: none;">
+            선택된 역: <span id="station-name"></span>
         </div>
 
-        <div class="budget-slider-container">
-            <input type="range" min="0" max="5" value="2" class="budget-slider" id="budget-range">
-            <div class="budget-range-display">
+        <div class="food-category">
+            <div class="food-btn btn-category" data-category="한식">한식</div>
+            <div class="food-btn btn-category" data-category="중식">중식</div>
+            <div class="food-btn btn-category" data-category="양식">양식</div>
+            <div class="food-btn btn-category" data-category="일식">일식</div>
+            <div class="food-btn btn-category" data-category="고기">고기</div>
+            <div class="food-btn btn-category" data-category="이색음식">이색음식</div>
+            <div class="food-btn btn-category" data-category="랜덤">랜덤</div>
+        </div>
+
+        <!-- 이중 슬라이더 영역 -->
+        <div class="range-slider-container">
+            <div class="range-slider">
+                <div class="range-selected"></div>
+                <div class="range-input">
+                    <input type="range" class="min-range" min="0" max="50000" value="20000" step="5000">
+                    <input type="range" class="max-range" min="0" max="50000" value="40000" step="5000">
+                </div>
+                <div class="range-slider-background"></div>
+            </div>
+            <div class="range-labels">
                 <span>0원</span>
-                <span id="budget-display">1-2만원</span>
+                <span class="budget-display" id="budget-display">2만원 ~ 4만원</span>
                 <span>5만원</span>
             </div>
         </div>
 
         <div class="weather-info" id="weather-info">
-            <p id="current-weather">날씨 정보 로딩 중...</p>
+            <p id="current-weather">15.8°C | 강수확률 0% | 맑음</p>
         </div>
 
         <button class="recommend-btn" id="recommend-btn">데이트 코스 추천받기</button>
     </div>
 
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script>
-        // URL에서 구 정보 추출
-        const urlParams = new URLSearchParams(window.location.search);
-        const district = urlParams.get('district');
-
-        // 구 제목 업데이트
-        document.getElementById('district-title').textContent = `${district} 데이트 코스 메뉴 선택`;
-
-        // 상태 관리 객체
-        const state = {
-            selectedCategory: null,
-            budgetRange: 2
-        };
-
-        // 음식 카테고리 선택 로직
-        document.querySelectorAll('.food-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                // 이미 선택된 카테고리를 다시 클릭하면 선택 해제
-                if (this.classList.contains('selected')) {
-                    this.classList.remove('selected');
-                    state.selectedCategory = null;
-                } else {
+        // 이중 슬라이더 관련 스크립트
+        document.addEventListener('DOMContentLoaded', function() {
+            const rangeInput = document.querySelectorAll('.range-input input');
+            const rangeSelected = document.querySelector('.range-selected');
+            const budgetDisplay = document.getElementById('budget-display');
+            const rangeSliderBackground = document.querySelector('.range-slider-background');
+            
+            // 상태 관리를 위한 객체
+            const state = {
+                minBudget: 20000,
+                maxBudget: 40000,
+                selectedCategory: null
+            };
+            
+            // URL 파라미터 추출
+            const urlParams = new URLSearchParams(window.location.search);
+            const district = urlParams.get('district');
+            const station = urlParams.get('station');  // 역 정보 추가
+            
+            // 구와 역 정보 표시
+            if (district && station) {
+                document.getElementById('district-title').textContent = `${district} 데이트 코스 메뉴 선택`;
+                document.getElementById('station-name').textContent = station;
+                document.getElementById('station-info').style.display = 'block';
+            } else if (district) {
+                document.getElementById('district-title').textContent = `${district} 데이트 코스 메뉴 선택`;
+            }
+            
+            // 음식 카테고리 선택
+            document.querySelectorAll('.btn-category').forEach(btn => {
+                btn.addEventListener('click', function() {
                     // 기존 선택 해제
-                    document.querySelectorAll('.food-btn').forEach(b => b.classList.remove('selected'));
+                    document.querySelectorAll('.btn-category').forEach(el => el.classList.remove('selected'));
                     
-                    // 새로운 카테고리 선택
+                    // 현재 버튼 선택
                     this.classList.add('selected');
+                    
+                    // 선택된 카테고리 저장
                     state.selectedCategory = this.dataset.category;
+                });
+            });
+            
+            // 가격 형식 포맷팅 함수
+            function formatPrice(price) {
+                if (price >= 10000) {
+                    const man = Math.floor(price / 10000);
+                    const chun = (price % 10000) / 1000;
+                    return man + '만' + (chun > 0 ? chun + '천' : '') + '원';
+                } else if (price >= 1000) {
+                    return (price / 1000) + '천원';
+                } else {
+                    return price + '원';
                 }
+            }
+            
+            // 가격 표시 업데이트 함수
+            function updatePriceDisplay() {
+                const minVal = parseInt(rangeInput[0].value);
+                const maxVal = parseInt(rangeInput[1].value);
+                
+                // 슬라이더 색상 영역 업데이트
+                const percent1 = (minVal / rangeInput[0].max) * 100;
+                const percent2 = (maxVal / rangeInput[1].max) * 100;
+                rangeSelected.style.left = percent1 + '%';
+                rangeSelected.style.right = (100 - percent2) + '%';
+                
+                // 가격 텍스트 업데이트
+                budgetDisplay.textContent = formatPrice(minVal) + ' ~ ' + formatPrice(maxVal);
+                
+                // state 객체 업데이트
+                state.minBudget = minVal;
+                state.maxBudget = maxVal;
+            }
+            
+            // 슬라이더 이벤트 리스너
+            rangeInput.forEach(input => {
+                input.addEventListener('input', function() {
+                    // 최소값은 최대값을 초과할 수 없고, 최대값은 최소값보다 작을 수 없음
+                    if (parseInt(rangeInput[0].value) > parseInt(rangeInput[1].value)) {
+                        if (this.classList.contains('min-range')) {
+                            rangeInput[0].value = rangeInput[1].value;
+                        } else {
+                            rangeInput[1].value = rangeInput[0].value;
+                        }
+                    }
+                    
+                    updatePriceDisplay();
+                });
+            });
+            
+            // 슬라이더 배경 클릭 이벤트 (5천원 단위로 이동)
+            rangeSliderBackground.addEventListener('click', function(e) {
+                const rangeSlider = document.querySelector('.range-slider');
+                const rect = rangeSlider.getBoundingClientRect();
+                const clickPosition = ((e.clientX - rect.left) / rect.width);
+                
+                // 클릭 위치의 값 계산 (5천원 단위로 반올림)
+                const maxValue = 50000;
+                let clickValue = Math.round((clickPosition * maxValue) / 5000) * 5000;
+                
+                // 현재 min, max 값
+                const minValue = parseInt(rangeInput[0].value);
+                const maxValue2 = parseInt(rangeInput[1].value);
+                
+                // 클릭 위치가 양쪽 핸들 중 어느 쪽에 더 가까운지 계산
+                const minDist = Math.abs(clickValue - minValue);
+                const maxDist = Math.abs(clickValue - maxValue2);
+                
+                // 더 가까운 핸들을 이동
+                if (minDist <= maxDist) {
+                    // 최소값 핸들 이동 (최대값보다 크지 않게)
+                    rangeInput[0].value = Math.min(clickValue, maxValue2);
+                } else {
+                    // 최대값 핸들 이동 (최소값보다 작지 않게)
+                    rangeInput[1].value = Math.max(clickValue, minValue);
+                }
+                
+                updatePriceDisplay();
+            });
+            
+            // 초기 가격 표시 업데이트
+            updatePriceDisplay();
+            
+            // 날씨 정보 로드
+            async function fetchWeatherInfo() {
+                try {
+                    const response = await axios.get(`/api/district/${district}`);
+                    const data = response.data;
+                    const weatherInfo = document.getElementById('current-weather');
+                    
+                    if (data.weather) {
+                        weatherInfo.textContent = `${data.weather.temp}°C | 강수확률 ${data.weather.precipitation}% | ${data.weather.sky_stts}`;
+                    }
+                } catch (error) {
+                    document.getElementById('current-weather').textContent = '날씨 정보를 불러올 수 없습니다.';
+                }
+            }
+            
+            // 날씨 정보 불러오기
+            if (district) {
+                fetchWeatherInfo();
+            }
+            
+            // 추천 버튼 클릭 이벤트 (역 정보 추가)
+            document.getElementById('recommend-btn').addEventListener('click', function() {
+                const category = state.selectedCategory || '랜덤';
+                let url = `/result?district=${district}&food_category=${category}`;
+                
+                // 역 정보가 있으면 추가
+                if (station) {
+                    url += `&station=${station}`;
+                }
+                
+                // 예산 정보 추가
+                url += `&min_budget=${state.minBudget}&max_budget=${state.maxBudget}`;
+                
+                window.location.href = url;
             });
         });
-
-        // 예산 범위 슬라이더
-        const slider = document.getElementById('budget-range');
-        const budgetDisplay = document.getElementById('budget-display');
-        const budgetRanges = ['0원', '1만원', '1-2만원', '2-3만원', '3-5만원', '5만원 이상'];
-
-        slider.addEventListener('input', function() {
-            state.budgetRange = this.value;
-            budgetDisplay.textContent = budgetRanges[this.value];
-        });
-
-        // 날씨 정보 로드
-        async function fetchWeatherInfo() {
-            try {
-                const response = await axios.get(`/api/district/${district}`);
-                const weatherData = response.data.weather;
-                
-                if (weatherData) {
-                    const weatherInfo = document.getElementById('current-weather');
-                    weatherInfo.textContent = `${weatherData.temp}°C | 강수확률 ${weatherData.precipitation}% | ${weatherData.sky_stts}`;
-                }
-            } catch (error) {
-                console.error('날씨 정보 로드 중 오류:', error);
-                document.getElementById('current-weather').textContent = '날씨 정보를 불러올 수 없습니다.';
-            }
-        }
-
-        // 코스 추천 버튼 클릭
-        document.getElementById('recommend-btn').addEventListener('click', function() {
-            // 데이트 코스 결과 페이지로 이동
-            const category = state.selectedCategory || '랜덤';
-            window.location.href = `/result?district=${district}&food_category=${category}&budget_range=${state.budgetRange}`;
-        });
-
-        // 페이지 로드 시 날씨 정보 불러오기
-        fetchWeatherInfo();
     </script>
 </body>
 </html>

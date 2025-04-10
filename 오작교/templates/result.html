@@ -109,6 +109,29 @@
             text-align: center;
             border-bottom: 1px solid #eee;
         }
+        .station-info {
+            background-color: #f0f0f0;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #555;
+        }
+        .no-data-message {
+            padding: 20px;
+            text-align: center;
+            color: #888;
+        }
+        .error-message {
+            padding: 20px;
+            text-align: center;
+            color: #ff6b6b;
+        }
+        .loading-placeholder {
+            padding: 20px;
+            text-align: center;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -116,6 +139,11 @@
         <div class="header">
             <h1>오작교</h1>
             <p id="district-title">데이트 코스 추천 결과</p>
+        </div>
+
+        <!-- 역 정보 표시 영역 추가 -->
+        <div id="station-info" class="station-info" style="display: none;">
+            선택된 역: <span id="station-name"></span>
         </div>
 
         <div class="weather-info" id="weather-info">
@@ -149,7 +177,10 @@
         // URL 파라미터 추출
         const urlParams = new URLSearchParams(window.location.search);
         const district = urlParams.get('district');
+        const station = urlParams.get('station'); // 역 정보 추가
         const foodCategory = urlParams.get('food_category');
+        const minBudget = urlParams.get('min_budget');
+        const maxBudget = urlParams.get('max_budget');
         const budgetRange = urlParams.get('budget_range');
 
         // 상태 관리 객체
@@ -174,28 +205,48 @@
             });
         });
 
-        // 날씨 정보 업데이트
         function updateWeatherInfo(weatherInfo) {
             const weatherDisplay = document.getElementById('weather-info');
             weatherDisplay.innerHTML = `
                 <strong>${weatherInfo.district}</strong> | 
                 ${weatherInfo.weather_status} | 
-                온도: ${weatherInfo.discomfort_index}°C | 
+                온도: ${weatherInfo.temp || 0}°C | 
                 강수량: ${weatherInfo.rainfall}mm
             `;
         }
 
-        // 장소 목록 렌더링
+        // 장소 목록 렌더링 - 리뷰 수와 가격 추가
         function renderPlaces(type, places) {
             const container = document.getElementById(type);
-            container.innerHTML = places.map((place, index) => `
-                <div class="place-item" data-type="${type}" data-index="${index}">
-                    <div class="place-details">
-                        <strong>${place.name}</strong>
-                        <p>${place.category || ''} | 평점: ${place.score || '정보 없음'}</p>
+            
+            if (!places || places.length === 0) {
+                container.innerHTML = `<div class="no-data-message">${type === 'restaurants' ? '맛집' : type === 'attractions' ? '놀거리' : '카페'} 정보가 없습니다.</div>`;
+                return;
+            }
+            
+            container.innerHTML = places.map((place, index) => {
+                let details = '';
+                
+                if (type === 'restaurants') {
+                    // 맛집: 카테고리, 평점, 리뷰 수, 가격 표시
+                    details = `${place.category || ''} | 평점: ${place.score || '정보 없음'} | 리뷰: ${place.review || '0'} | 가격: ${formatPrice(place.price) || '정보 없음'}`;
+                } else if (type === 'attractions') {
+                    // 놀거리: 카테고리만 표시 (평점 제외)
+                    details = `${place.category || ''}`;
+                } else if (type === 'cafes') {
+                    // 카페: 평점과 리뷰 수 표시
+                    details = `평점: ${place.score || '정보 없음'} | 리뷰: ${place.review || '0'}`;
+                }
+                
+                return `
+                    <div class="place-item" data-type="${type}" data-index="${index}">
+                        <div class="place-details">
+                            <strong>${place.name}</strong>
+                            <p>${details}</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             // 장소 선택 이벤트 리스너 추가
             container.querySelectorAll('.place-item').forEach(item => {
@@ -217,6 +268,24 @@
             });
         }
 
+        // 가격 형식화 함수
+        function formatPrice(price) {
+            if (!price) return '정보 없음';
+            
+            price = Number(price);
+            if (isNaN(price)) return '정보 없음';
+            
+            if (price >= 10000) {
+                const man = Math.floor(price / 10000);
+                const chun = Math.floor((price % 10000) / 1000);
+                return `${man}만${chun > 0 ? chun + '천' : ''}원`;
+            } else if (price >= 1000) {
+                return `${Math.floor(price / 1000)}천원`;
+            } else {
+                return `${price}원`;
+            }
+        }
+
         // 모든 장소 선택 확인
         function checkAllPlacesSelected() {
             const selectedCourseBtn = document.getElementById('selected-course-btn');
@@ -227,14 +296,34 @@
             }
         }
 
-        // 데이트 코스 추천 API 호출
+        // 데이트 코스 추천 API 호출 - 역 정보와 예산 정보 추가
         async function fetchRecommendations() {
             try {
-                const response = await axios.post('/api/recommend', {
+                // API 요청 데이터 준비
+                const requestData = {
                     district: district,
-                    food_category: foodCategory,
-                    budget_range: budgetRange
-                });
+                    food_category: foodCategory
+                };
+                
+                // 역 정보가 있으면 추가
+                if (station) {
+                    requestData.station = station;
+                    
+                    // 역 정보 표시
+                    document.getElementById('station-name').textContent = station;
+                    document.getElementById('station-info').style.display = 'block';
+                }
+                
+                // 예산 정보 추가 (이중 슬라이더)
+                if (minBudget && maxBudget) {
+                    requestData.min_budget = minBudget;
+                    requestData.max_budget = maxBudget;
+                } else if (budgetRange) {
+                    // 기존 방식 유지
+                    requestData.budget_range = budgetRange;
+                }
+
+                const response = await axios.post('/api/recommend', requestData);
 
                 const { weather_info, restaurants, attractions, cafes } = response.data;
 
@@ -248,7 +337,15 @@
 
             } catch (error) {
                 console.error('추천 데이터 로드 중 오류:', error);
-                alert('데이트 코스를 불러오는 데 실패했습니다.');
+                
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.innerHTML = `
+                        <div class="error-message">
+                            데이터를 불러오는 데 실패했습니다.<br>
+                            <button onclick="window.location.href='/'">처음으로 돌아가기</button>
+                        </div>
+                    `;
+                });
             }
         }
 
@@ -256,16 +353,25 @@
         document.getElementById('selected-course-btn').addEventListener('click', function() {
             const { restaurants, attractions, cafes } = state.selectedPlaces;
             
-            // 카카오맵 경로 표시 (임시 구현)
-            const mapUrl = `https://map.kakao.com/link/map/${restaurants.name},${attractions.name},${cafes.name}`;
-            window.open(mapUrl, '_blank');
+            // 모든 장소가 선택되었는지 확인
+            if (!restaurants || !attractions || !cafes) {
+                alert('맛집, 놀거리, 카페를 모두 선택해주세요.');
+                return;
+            }
+            
+            // 맵 페이지로 이동 (장소 정보 전달)
+            window.location.href = `/map?restaurant=${encodeURIComponent(JSON.stringify(restaurants))}&attraction=${encodeURIComponent(JSON.stringify(attractions))}&cafe=${encodeURIComponent(JSON.stringify(cafes))}`;
         });
-
+        
         // 페이지 로드 시 추천 데이터 불러오기
         fetchRecommendations();
 
-        // 구 제목 업데이트
-        document.getElementById('district-title').textContent = `${district} 데이트 코스 추천 결과`;
+        // 구 제목 업데이트 (역 정보 포함)
+        if (district && station) {
+            document.getElementById('district-title').textContent = `${district} ${station} 데이트 코스 추천 결과`;
+        } else if (district) {
+            document.getElementById('district-title').textContent = `${district} 데이트 코스 추천 결과`;
+        }
     </script>
 </body>
 </html>

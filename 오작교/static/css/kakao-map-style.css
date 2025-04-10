@@ -1,0 +1,139 @@
+/* CSS를 따로 분리하여 관리할 경우 사용할 수 있는 스타일 */
+
+/* 카카오맵 컨테이너 스타일 */
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 거리 정보 컨테이너 */
+.distance-info-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 개별 장소 아이템 */
+.place-route-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* 장소 번호 */
+.place-number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #6b5b95;
+    color: white;
+    font-weight: bold;
+    margin-right: 12px;
+}
+
+/* 장소 정보 */
+.place-info {
+    flex-grow: 1;
+}
+
+.place-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.place-category {
+    font-size: 12px;
+    color: #666;
+}
+
+/* 거리 표시 */
+.distance-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    margin: 10px 0;
+}
+
+.distance-line {
+    width: 2px;
+    height: 30px;
+    background-color: #ff6b6b;
+    margin: 0 10px;
+}
+
+.distance-text {
+    font-size: 14px;
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+/* 총 거리 표시 */
+.total-distance-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-top: 15px;
+    border-top: 1px dashed #ddd;
+}
+
+.total-distance-label {
+    font-weight: bold;
+    color: #333;
+}
+
+.total-distance-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ff6b6b;
+}
+
+/* 경로 안내 버튼 */
+.route-guidance-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.route-guidance-btn:hover {
+    background-color: #e65c5c;
+}
+
+/* 거리 아이콘 */
+.distance-icon {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* 도보 시간 표시 */
+.walking-time {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #666;
+}

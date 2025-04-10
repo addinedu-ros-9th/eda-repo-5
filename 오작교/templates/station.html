@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오작교 - 역 선택</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #ff6b6b;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .station-list {
+            padding: 15px;
+        }
+        .station-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .station-item:hover {
+            background-color: #f0f0f0;
+        }
+        .station-item.selected {
+            background-color: #6b5b95;
+            color: white;
+        }
+        .station-name {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .station-score {
+            color: #666;
+            font-size: 14px;
+        }
+        .station-item.selected .station-score {
+            color: rgba(255,255,255,0.7);
+        }
+        .next-btn {
+            display: none;
+            width: 90%;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .next-btn:hover {
+            background-color: #e65c5c;
+        }
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        .error-message {
+            text-align: center;
+            padding: 20px;
+            color: #ff6b6b;
+            background-color: #fff0f0;
+            margin: 10px;
+            border-radius: 5px;
+        }
+        .continue-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .continue-btn:hover {
+            background-color: #e65c5c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>오작교</h1>
+            <p id="district-title">역 선택</p>
+        </div>
+        
+        <div id="station-list" class="station-list">
+            <div class="loading">역 정보를 불러오는 중...</div>
+        </div>
+
+        <button id="next-btn" class="next-btn">다음</button>
+    </div>
+
+    <script>
+        // URL에서 구 정보 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const district = urlParams.get('district');
+        let selectedStation = null;
+        
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            // 구 이름 표시
+            if (district) {
+                document.getElementById('district-title').textContent = `${district} 역 선택`;
+            }
+            
+            // 역 정보 불러오기
+            fetchStations(district);
+        });
+        
+        /// 역 정보 불러오기 함수
+        async function fetchStations(district) {
+            try {
+                const response = await axios.get(`/api/stations/${district}`);
+                const stations = response.data.stations;
+                
+                if (stations && stations.length > 0) {
+                    renderStations(stations);
+                } else {
+                    document.getElementById('station-list').innerHTML = `
+                        <div class="error-message">
+                            ${district}에 이용 가능한 역이 없습니다.
+                            <p>역 정보가 없어도 계속 진행하실 수 있습니다.</p>
+                            <button id="continue-btn" class="continue-btn">메뉴 선택으로 계속하기</button>
+                        </div>
+                    `;
+                    
+                    // 계속하기 버튼 이벤트 리스너
+                    document.getElementById('continue-btn').addEventListener('click', function() {
+                        window.location.href = `/select/${district}?district=${district}`;
+                    });
+                }
+            } catch (error) {
+                console.error('역 정보 로드 중 오류:', error);
+                document.getElementById('station-list').innerHTML = `
+                    <div class="error-message">
+                        역 정보를 불러오는 중 오류가 발생했습니다.
+                        <p>오류가 발생해도 계속 진행하실 수 있습니다.</p>
+                        <button id="continue-btn" class="continue-btn">메뉴 선택으로 계속하기</button>
+                    </div>
+                `;
+                
+                // 계속하기 버튼 이벤트 리스너
+                document.getElementById('continue-btn').addEventListener('click', function() {
+                    window.location.href = `/select/${district}?district=${district}`;
+                });
+            }
+        }
+        
+        // 역 목록 렌더링 함수
+        function renderStations(stations) {
+            const stationListContainer = document.getElementById('station-list');
+            
+            // 목록 HTML 생성 (star 컬럼 사용)
+            const stationListHTML = stations.map((stationData, index) => `
+                <div class="station-item" data-station="${stationData.station}">
+                    <div class="station-name">${index + 1}. ${stationData.station}</div>
+                    <div class="station-score">데이트 선호도: ${stationData.star}</div>
+                </div>
+            `).join('');
+            
+            // 역 목록 표시
+            stationListContainer.innerHTML = stationListHTML;
+            
+            
+            // 역 선택 이벤트 리스너 추가
+            document.querySelectorAll('.station-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // 모든 역 선택 해제
+                    document.querySelectorAll('.station-item').forEach(el => el.classList.remove('selected'));
+                    
+                    // 현재 역 선택
+                    this.classList.add('selected');
+                    selectedStation = this.dataset.station;
+                    
+                    // 다음 버튼 표시
+                    document.getElementById('next-btn').style.display = 'block';
+                });
+            });
+            
+            // 다음 버튼 이벤트 리스너
+            document.getElementById('next-btn').addEventListener('click', function() {
+                if (selectedStation) {
+                    window.location.href = `/select/${district}?district=${district}&station=${selectedStation}`;
+                } else {
+                    alert('역을 선택해주세요.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

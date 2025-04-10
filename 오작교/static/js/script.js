@@ -58,7 +58,8 @@ const pageScripts = {
         const state = {
             district: null,
             selectedCategory: null,
-            budgetRange: 2
+            minBudget: 20000,   // 초기값 설정
+            maxBudget: 40000    // 초기값 설정
         };
 
         // URL에서 구 정보 추출
@@ -70,14 +71,10 @@ const pageScripts = {
             state.selectedCategory = dataset.category;
         });
 
-        // 예산 범위 슬라이더
-        const slider = document.getElementById('budget-range');
-        const budgetDisplay = document.getElementById('budget-display');
-        const budgetRanges = ['0원', '1만원', '1-2만원', '2-3만원', '3-5만원', '5만원 이상'];
-
-        slider.addEventListener('input', function() {
-            state.budgetRange = this.value;
-            budgetDisplay.textContent = budgetRanges[this.value];
+        // 이중 슬라이더 값 변경 이벤트 리스너 추가
+        document.addEventListener('budgetRangeChanged', function(e) {
+            state.minBudget = e.detail.minBudget;
+            state.maxBudget = e.detail.maxBudget;
         });
 
         // 날씨 정보 로드
@@ -97,7 +94,7 @@ const pageScripts = {
         // 코스 추천 버튼 클릭
         document.getElementById('recommend-btn').addEventListener('click', function() {
             const category = state.selectedCategory || '랜덤';
-            window.location.href = `/result?district=${state.district}&food_category=${category}&budget_range=${state.budgetRange}`;
+            window.location.href = `/result?district=${state.district}&food_category=${category}&min_budget=${state.minBudget}&max_budget=${state.maxBudget}`;
         });
 
         // 페이지 로드 시 날씨 정보 불러오기
@@ -109,7 +106,8 @@ const pageScripts = {
         const state = {
             district: null,
             foodCategory: null,
-            budgetRange: null,
+            minBudget: null,
+            maxBudget: null,
             selectedPlaces: {
                 restaurants: null,
                 attractions: null,
@@ -121,7 +119,16 @@ const pageScripts = {
         const urlParams = new URLSearchParams(window.location.search);
         state.district = urlParams.get('district');
         state.foodCategory = urlParams.get('food_category');
-        state.budgetRange = urlParams.get('budget_range');
+        
+        // 새로운 예산 파라미터 처리
+        state.minBudget = urlParams.get('min_budget');
+        state.maxBudget = urlParams.get('max_budget');
+        
+        // 이전 방식 호환성 유지
+        const budgetRange = urlParams.get('budget_range');
+        if (budgetRange && (!state.minBudget || !state.maxBudget)) {
+            state.budgetRange = budgetRange;
+        }
 
         // 탭 전환 로직
         function setupTabNavigation() {
@@ -197,13 +204,23 @@ const pageScripts = {
         // 데이트 코스 추천 API 호출
         async function fetchRecommendations() {
             try {
+                const requestData = {
+                    district: state.district,
+                    food_category: state.foodCategory
+                };
+                
+                // 새로운 예산 파라미터 사용
+                if (state.minBudget && state.maxBudget) {
+                    requestData.min_budget = state.minBudget;
+                    requestData.max_budget = state.maxBudget;
+                } else if (state.budgetRange) {
+                    // 이전 방식 호환성 유지
+                    requestData.budget_range = state.budgetRange;
+                }
+
                 const data = await utils.fetchData('/api/recommend', {
                     method: 'POST',
-                    data: {
-                        district: state.district,
-                        food_category: state.foodCategory,
-                        budget_range: state.budgetRange
-                    }
+                    data: requestData
                 });
 
                 const { weather_info, restaurants, attractions, cafes } = data;
