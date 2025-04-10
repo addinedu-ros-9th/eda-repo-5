@@ -1,18 +1,18 @@
 import os
+from dotenv import load_dotenv
+
+# .env 파일 로드
+load_dotenv()
 
 class Config:
-    """
-    애플리케이션 구성 관리 클래스
-    """
-    # 데이터베이스 설정
-    DB_HOST = 'database-1.cnu82kme6p4d.ap-northeast-2.rds.amazonaws.com'
-    DB_PORT = 3306
-    DB_USER = 'eda'
-    DB_PASSWORD = 'ojk0707'
-    DB_NAME = 'ojk'
+    # 환경 변수에서 값 읽어오기
+    DB_HOST = os.getenv('DB_HOST')
+    DB_PORT = int(os.getenv('DB_PORT', 3306))
+    DB_USER = os.getenv('DB_USER')
+    DB_PASSWORD = os.getenv('DB_PASSWORD')
+    DB_NAME = os.getenv('DB_NAME')
 
-    # Flask 애플리케이션 설정
-    SECRET_KEY = 'development_secret_key_for_ojak_gyo'
+    SECRET_KEY = os.getenv('SECRET_KEY', 'fallback_secret_key')
     DEBUG = True
     
     # 추천 엔진 설정

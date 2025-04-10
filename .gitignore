@@ -2,6 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
+# .gitignore
+.env
+*.pyc
+__pycache__/
+venv/
+*.log
 
 # C extensions
 *.so
