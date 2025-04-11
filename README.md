@@ -324,7 +324,7 @@ DB에 저장된 원천 데이터를 기반으로, **사용자 맞춤형 추천�
 
 ### 주요 문제 사례 및 해결 방식
 **지하철역 정보 누락**  
-- 일부 명소 주변 지하철 정보 누락 → Google Maps API로 보완
+- 일부 명소 주변 지하철 정보 누락 → 누락된 지하철역 정보만 Google Maps API로 습득
   ![hard_station](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/hard_station.png)
 
 **네이버 지도 iframe 구조**  
