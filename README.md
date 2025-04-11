@@ -320,11 +320,21 @@ DB에 저장된 원천 데이터를 기반으로, **사용자 맞춤형 추천�
 ---
 
 ## 🔧프로젝트 문제점 및 해결
+프로젝트 진행 중 크고 명확한 오류보다도, 여러 자잘한 이슈들이 반복적으로 발생하며 전체 개발 흐름의 난이도를 높였습니다.  
+이러한 문제들은 단독으로는 단순해 보이지만, 해결 과정에서 많은 시행착오와 기술적 트러블슈팅 경험을 쌓을 수 있는 기회가 되었습니다
+
+### 주요 문제 사례 및 해결 방식
+**지하철역 정보 누락**  
 - 일부 명소 주변 지하철 정보 누락 → Google Maps API로 보완
   ![hard_station](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/hard_station.png)
-- 네이버지도 iframe 구조 → `switch_to.frame()`으로 해결
+
+**네이버 지도 iframe 구조**  
+- 놀거리 정보 크롤링 시 iframe 내부 요소에 접근 불가 → `switch_to.frame()`으로 해결
 ![hard_iframe](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/hard_iframe.png)
 
+**크롤링 시 요소 stale 문제**  
+- 요소 클릭시 요소가 사라지거나 갱신되면서 `StaleElementReferenceException` 발생 → WebDriverWait과 예외 처리 로직 반복 삽입
+![hard_crawl](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/hard_crawl.png)
 ---
 ## ⚠️프로젝트 한계점
 
