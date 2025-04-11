@@ -328,7 +328,7 @@ DB에 저장된 원천 데이터를 기반으로, **사용자 맞춤형 추천�
   ![hard_station](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/hard_station.png)
 
 **네이버 지도 iframe 구조**  
-- 놀거리 정보 크롤링 시 iframe 내부 요소에 접근 불가 → `switch_to.frame()`으로 해결
+-놀거리 정보는 iframe 내부에 포함되어 있어, Selenium으로 바로 접근할 수 없음 → driver.switch_to.frame()을 사용해 iframe으로 전환 후 접근 가능
 ![hard_iframe](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/hard_iframe.png)
 
 **크롤링 시 요소 stale 문제**  
