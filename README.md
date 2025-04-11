@@ -46,8 +46,8 @@
 
 | 데이터 종류       | 출처                      | 수집 방법      |
 |------------------|---------------------------|---------------|
-| 맛집/카페        | 카카오맵                   | Selenium betifulsoup 크롤링 |
-| 놀거리           | 네이버 지도                | Selenium beautifulsoup 크롤링 |
+| 맛집/카페        | 카카오맵                   | Selenium, betifulsoup 크롤링 |
+| 놀거리           | 네이버 지도                | Selenium, beautifulsoup 크롤링 |
 | 명소 주변 지하철 | 구글 맵스 API              | API 호출       |
 | 서울시 명소 정보 | 서울시 도시데이터 API         | API 호출     |
 | 실시간 날씨 데이터       | 서울시 도시데이터 API      | API 호출       |
