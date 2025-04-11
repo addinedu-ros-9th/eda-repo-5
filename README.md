@@ -271,6 +271,8 @@ DB에 저장된 원천 데이터를 기반으로, **사용자 맞춤형 추천�
 (서울 25개 자치구)              
 [![서울 자치구 선택](https://img.youtube.com/vi/J2blsgPEKLM/0.jpg)](https://youtu.be/J2blsgPEKLM)
 
+![gu_selection](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/app_gu_selection.gif)
+
 ### 2.지하철 역 선택 기능
 (종합점수를 기준으로 데이트 선호도 점수 표시)
 [![지하철 역 선택](https://img.youtube.com/vi/DBRbcBc_j6I/0.jpg)](https://youtu.be/DBRbcBc_j6I)
