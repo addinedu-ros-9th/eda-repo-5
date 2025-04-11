@@ -267,25 +267,21 @@ DB에 저장된 원천 데이터를 기반으로, **사용자 맞춤형 추천�
 
 ## 💡 서비스 기능 및 설명
 
-2. 역 선택 → 각 구의 주요 상권
-3. 음식 종류 및 가격대 설정
-4. 맛집/놀거리/카페 순서대로 추천
-5. 종합 데이트 코스 확정 및 제공
 ### 1.지역 선택 기능 
 (서울 25개 자치구)
-![gu_select](./gu_select.gif)
+https://youtu.be/J2blsgPEKLM
 
 ### 2.지하철 역 선택 기능
 (종합점수를 기준으로 데이트 선호도 점수 표시)
-![station_list](./station_list.gif)
+https://youtu.be/DBRbcBc_j6I
 
 ### 3.메뉴 및 가격 선택 기능
 (원하는 음식 종류 및 가격대 설정, 랜덤 선택시 여성 선호 메뉴 순위에 따라 일정비율로 추천)
-![selectPmenu](./selectPmenu.gif)
+https://youtu.be/-PCOb7ygTy4
 
 ### 4.추천 장소 선택 기능 및  장소 간 거리 표시 기능
 (알고리즘을 기반으로 맛집, 카페, 놀거리 리스트 시현 및 선택시 장소마다 거리 및 도보 시간 시현)
-![show_course](./show_course.gif)
+https://youtu.be/Gg9Qqm1hZ3E
 
 ---
 
