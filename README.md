@@ -268,7 +268,7 @@ DB에 저장된 원천 데이터를 기반으로, **사용자 맞춤형 추천�
 ## 💡 서비스 기능 및 설명
 
 ### 1.지역 선택 기능 
-(서울 25개 자치구)
+(서울 25개 자치구)              
 [![서울 자치구 선택](https://img.youtube.com/vi/J2blsgPEKLM/0.jpg)](https://youtu.be/J2blsgPEKLM)
 
 ### 2.지하철 역 선택 기능
