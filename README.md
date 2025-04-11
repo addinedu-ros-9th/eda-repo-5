@@ -5,6 +5,40 @@
 
 ---
 
+## 💡 서비스 기능 및 설명
+
+### 1. 지역 선택 기능
+
+서울시 25개 자치구 중 하나를 선택하여 데이트 코스 추천 범위를 설정할 수 있습니다.
+
+![app_gu_selection](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/app_gu_selection.gif)
+
+
+### 2. 지하철역 선택 기능
+
+선택한 자치구에 포함된 지하철역 중 하나를 선택할 수 있으며,  
+각 역에는 내부 분석을 바탕으로 산출된 데이트 선호도 점수가 함께 표시됩니다.
+
+![app_station_select](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/app_station_select.gif)
+
+
+### 3. 메뉴 및 가격 선택 기능
+
+선호하는 음식 종류와 가격대를 설정할 수 있으며,  
+랜덤 추천 기능 선택 시 20대 여성의 외식 선호도 데이터를 기반으로 자동 추천됩니다.
+
+![app_menu_select](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/app_menu_select.gif)
+
+
+### 4. 추천 장소 선택 및 거리 정보 표시 기능
+
+날씨와 평가지표를 고려한 알고리즘을 통해 맛집, 카페, 놀거리를 추천하고,  
+선택한 장소 간의 거리 및 예상 도보 시간이 함께 제공됩니다.
+
+[![추천 장소 선택](https://img.youtube.com/vi/Gg9Qqm1hZ3E/0.jpg)](https://youtu.be/Gg9Qqm1hZ3E)
+
+---
+
 ## 📦 프로젝트 개요
 ### 팀 구성원 및 역할
 
@@ -282,41 +316,6 @@ DB에 저장된 원천 데이터를 기반으로, **사용자 맞춤형 추천�
 
 3. **정성적 요소 미반영**  
    장소의 분위기, 서비스 품질, 이용자 리뷰의 감성 등 정성적 요소는 고려되지 않았음.
----
-
-## 💡 서비스 기능 및 설명
-
-### 1. 지역 선택 기능
-
-서울시 25개 자치구 중 하나를 선택하여 데이트 코스 추천 범위를 설정할 수 있습니다.
-
-![app_gu_selection](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/app_gu_selection.gif)
-
-
-### 2. 지하철역 선택 기능
-
-선택한 자치구에 포함된 지하철역 중 하나를 선택할 수 있으며,  
-각 역에는 내부 분석을 바탕으로 산출된 데이트 선호도 점수가 함께 표시됩니다.
-
-![app_station_select](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/app_station_select.gif)
-
-
-### 3. 메뉴 및 가격 선택 기능
-
-선호하는 음식 종류와 가격대를 설정할 수 있으며,  
-랜덤 추천 기능 선택 시 20대 여성의 외식 선호도 데이터를 기반으로 자동 추천됩니다.
-
-![app_menu_select](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/app_menu_select.gif)
-
-
-### 4. 추천 장소 선택 및 거리 정보 표시 기능
-
-날씨와 평가지표를 고려한 알고리즘을 통해 맛집, 카페, 놀거리를 추천하고,  
-선택한 장소 간의 거리 및 예상 도보 시간이 함께 제공됩니다.
-
-[![추천 장소 선택](https://img.youtube.com/vi/Gg9Qqm1hZ3E/0.jpg)](https://youtu.be/Gg9Qqm1hZ3E)
-
-
 ---
 
 ## 🔧프로젝트 문제점 및 해결
