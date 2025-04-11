@@ -35,7 +35,7 @@
 날씨와 평가지표를 고려한 알고리즘을 통해 맛집, 카페, 놀거리를 추천하고,  
 선택한 장소 간의 거리 및 예상 도보 시간이 함께 제공됩니다.
 
-[![추천 장소 선택](https://img.youtube.com/vi/Gg9Qqm1hZ3E/0.jpg)](https://youtu.be/Gg9Qqm1hZ3E)
+![app_show_course](https://github.com/addinedu-ros-9th/eda-repo-5/blob/main/image/app_show_course.gif)
 
 ---
 
